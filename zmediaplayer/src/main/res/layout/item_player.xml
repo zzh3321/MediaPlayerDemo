@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#F2F2F2"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/player_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30px"
+            android:text="00.00"
+            android:textColor="#B3B3B3"
+            android:textSize="11px"/>
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/player_total_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="31px"
+            android:text="00.00"
+            android:textColor="#B3B3B3"
+            android:textSize="11px"/>
+
+    </com.zhy.autolayout.AutoLinearLayout>
+
+    <SeekBar
+        android:id="@+id/player_seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15px"
+        android:layout_marginRight="15px"
+        android:layout_marginTop="3px"
+        android:max="100"
+        android:maxHeight="2dp"
+        android:progressDrawable="@drawable/seekbar_style"
+        android:secondaryProgress="0"
+        android:thumb="@drawable/seekbar_thumb"/>
+
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="17dp"
+        android:gravity="center">
+
+        <ImageButton
+            android:id="@+id/player_up"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginRight="40dp"
+            android:background="@drawable/selector_speed"
+            android:scaleType="fitXY"/>
+
+        <ImageButton
+            android:id="@+id/player_begin"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:background="@drawable/player_stop_big"
+            android:scaleType="fitXY"/>
+
+        <ImageButton
+            android:id="@+id/player_next"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="40dp"
+            android:background="@drawable/selector_rewind_down"
+            android:scaleType="fitXY"/>
+
+    </com.zhy.autolayout.AutoLinearLayout>
+</com.zhy.autolayout.AutoLinearLayout>
