@@ -9,12 +9,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import java.util.List;
+
 /**
  * 创建人:zzh ; 时间: 2017/6/15.
  * 描述:ZMediaPlayer
  */
 
-public class ZMediaPlayer extends FrameLayout{
+public class ZMediaPlayer extends FrameLayout {
     private Context context;
 
     private ZMediaPlayerController playerController;
@@ -38,18 +40,23 @@ public class ZMediaPlayer extends FrameLayout{
     }
 
     private void init() {
-        if (view == null){
-            view = LayoutInflater.from(context).inflate(getLayoutId(),null);
+        if (view == null) {
+            view = LayoutInflater.from(context).inflate(getLayoutId(), null);
         }
         playerController.setView(view);
         addView(view);
     }
 
-    public int getLayoutId(){
+    public int getLayoutId() {
         return R.layout.item_player;
     }
 
-    public void setUp(String url,String id){
-        mediaPlayerService.setUp(url,id);
+
+    public void setUp(String url) {
+        mediaPlayerService.setUp(url);
+    }
+
+    public void setUp(List<String> url) {
+        mediaPlayerService.setUp(url);
     }
 }

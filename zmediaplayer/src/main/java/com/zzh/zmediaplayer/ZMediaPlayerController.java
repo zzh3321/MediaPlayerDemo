@@ -31,11 +31,13 @@ public class ZMediaPlayerController implements View.OnClickListener, SeekBar.OnS
     private CountDownTimer mDismissTopBottomCountDownTimer;
 
     private Context mContext;
+    private int progress;
+
+    private boolean startSeekbarTrackingTouch = true;
 
     private static ZMediaPlayerInterface mPlayerInterface;
-
     private SimpleDateFormat time = new SimpleDateFormat("mm:ss");
-
+    private static final String TAG = "ZMediaPlayerController";
     private static ZMediaPlayerController playerController;
 
     public static ZMediaPlayerController instance(Context mContext) {
@@ -45,7 +47,7 @@ public class ZMediaPlayerController implements View.OnClickListener, SeekBar.OnS
         return playerController;
     }
 
-    public ZMediaPlayerController(Context mContext){
+    public ZMediaPlayerController(Context mContext) {
         this.mContext = mContext;
     }
 
@@ -83,19 +85,21 @@ public class ZMediaPlayerController implements View.OnClickListener, SeekBar.OnS
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (fromUser) {//不判断会导致持续走下面的方法,音乐卡顿
-            mPlayerInterface.seekTo(progress);
-        }
+//        if (fromUser) {//不判断会导致持续走下面的方法,音乐卡顿
+//
+//        }
+        this.progress = progress;
     }
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-
+        startSeekbarTrackingTouch = true;
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-
+        startSeekbarTrackingTouch = false;
+        mPlayerInterface.seekTo(progress);
     }
 
     public void setControllerState(int playerState, int playState) {
@@ -162,8 +166,10 @@ public class ZMediaPlayerController implements View.OnClickListener, SeekBar.OnS
         int duration = mPlayerInterface.getDuration();
         int bufferPercentage = mPlayerInterface.getBufferPercentage();
         seekBar.setMax(duration);
-        seekBar.setProgress(position);
-        seekBar.setSecondaryProgress(bufferPercentage);
+        if (!startSeekbarTrackingTouch){
+            seekBar.setProgress(position);
+        }
+        seekBar.setSecondaryProgress(duration * bufferPercentage / 100);
         playerTime.setText(time.format(position));
         playerTotalTime.setText(time.format(duration));
     }

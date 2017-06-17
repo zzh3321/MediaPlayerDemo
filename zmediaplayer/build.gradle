@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 25
@@ -31,4 +32,13 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     compile 'com.zhy:autolayout:1.4.5'
+}
+
+publish {
+    userOrg = 'zhouzh'
+    groupId = 'com.zmediaplayer'
+    artifactId = 'zmediaplayer'
+    publishVersion = '1.1.0'
+    desc = 'this is a simple media player'
+    website = 'https://github.com/zzh3321/MediaPlayerDemo'
 }

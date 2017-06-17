@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -15,7 +16,7 @@ import java.io.IOException;
  * 描述:
  */
 
-public class ZMediaPlayerService extends Service implements ZMediaPlayerInterface{
+public class ZMediaPlayerService extends Service implements ZMediaPlayerInterface {
     public static final int STATE_ERROR = -1;          // 播放错误
     public static final int STATE_IDLE = 0;            // 播放未开始
     public static final int STATE_PREPARING = 1;       // 播放准备中
@@ -32,13 +33,19 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
 
     public static final int PLAYER_NORMAL = 7;
     public static final int PLAYER_PAUSED = 8;//手动暂停
-
     private int mPlayerState = PLAYER_NORMAL;
+
+    public static final int CONTROL_NORMAL = 9;
+    public static final int CONTROL_UP = 10;
+    public static final int CONTROL_NEXT = 11;
+    private int mControlState = CONTROL_NORMAL;
 
     private int mBufferPercentage;
 
     private String url;//播放的地址
+    private List<String> listUrl;//播放地址
     private String id;//播放的id
+    private int position = 0;//用来记录当前播放的url的索引
 
     @Override
     public void onCreate() {
@@ -46,23 +53,6 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
         mController = ZMediaPlayerController.instance(this);
         setController();
         initMediaPlayer();
-    }
-
-    private void initMediaPlayer() {
-        if (mediaPlayer == null) {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setOnPreparedListener(mOnPreparedListener);
-            mediaPlayer.setOnCompletionListener(mOnCompletionListener);
-            mediaPlayer.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
-        }
-    }
-
-    private MyBinder binder = new MyBinder();
-
-    public class MyBinder extends Binder {
-        public ZMediaPlayerService getService() {
-            return ZMediaPlayerService.this;
-        }
     }
 
     @Override
@@ -77,11 +67,16 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
     }
 
 
-
     @Override
     public void start() {
+        setDataAndStartMedia();
+    }
+
+    private void setDataAndStartMedia() {
+        initializePlayerState();
+        String s = getPlayUrl();
         try {
-            mediaPlayer.setDataSource(url);
+            mediaPlayer.setDataSource(s);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -89,6 +84,7 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
         mCurrentState = STATE_PREPARING;
         mController.setControllerState(mPlayerState, mCurrentState);
     }
+
 
     @Override
     public void restart() {
@@ -100,12 +96,14 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
 
     @Override
     public void up() {
-
+        mControlState = CONTROL_UP;
+        setDataAndStartMedia();
     }
 
     @Override
     public void next() {
-
+        mControlState = CONTROL_NEXT;
+        setDataAndStartMedia();
     }
 
     @Override
@@ -137,7 +135,7 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
 
     @Override
     public int getDuration() {
-        return mediaPlayer != null ? mediaPlayer.getDuration() : 0;
+        return (mediaPlayer != null && mCurrentState != STATE_PREPARING) ? mediaPlayer.getDuration() : 0;
     }
 
     @Override
@@ -190,6 +188,14 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
         return mPlayerState == PLAYER_PAUSED;
     }
 
+    private MyBinder binder = new MyBinder();
+
+    public class MyBinder extends Binder {
+        public ZMediaPlayerService getService() {
+            return ZMediaPlayerService.this;
+        }
+    }
+
 
     private MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
         @Override
@@ -198,9 +204,16 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
         }
     };
 
+    private boolean onBufferingFirstChange = true;
+
     private MediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = new MediaPlayer.OnBufferingUpdateListener() {
         @Override
         public void onBufferingUpdate(MediaPlayer mp, int percent) {
+            //有时候第一次进来直接会变成100然后又重头开始,暂时这么处理
+            if (onBufferingFirstChange && percent == 100){
+                onBufferingFirstChange = false;
+                return;
+            }
             mBufferPercentage = percent;
         }
     };
@@ -217,6 +230,23 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
         }
     };
 
+    private void initializePlayerState() {
+        if (mediaPlayer != null) {
+            //mediaPlayer.stop();
+            mediaPlayer.reset();
+            onBufferingFirstChange = true;
+        }
+    }
+
+    private void initMediaPlayer() {
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setOnPreparedListener(mOnPreparedListener);
+            mediaPlayer.setOnCompletionListener(mOnCompletionListener);
+            mediaPlayer.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
+        }
+    }
+
 
     public void setController() {
         ZMediaPlayerController mController = ZMediaPlayerController.instance(this);
@@ -224,12 +254,54 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
     }
 
 
-    public void setUp(String url,String id){
+    public void setUp(String url) {
+        listUrl = null;
         this.url = url;
-        this.id = id;
+    }
+
+    public void setUp(List<String> listUrl) {
+        url = null;
+        this.listUrl = listUrl;
     }
 
     public String getUrl() {
         return url;
+    }
+
+
+    private String getPlayUrl() {
+        if (url != null) {
+            return url;
+        }
+
+        if (listUrl != null) {
+            updatePosition();
+            return listUrl.get(position);
+        }
+
+        return null;
+    }
+
+    private void updatePosition() {
+        switch (mControlState) {
+            case CONTROL_NORMAL:
+                break;
+            case CONTROL_UP:
+                if (position > 0) {
+                    position--;
+                } else {
+                    position = listUrl.size() - 1;
+                }
+                mControlState = CONTROL_NORMAL;
+                break;
+            case CONTROL_NEXT:
+                if (position < listUrl.size() - 1) {
+                    position++;
+                } else {
+                    position = 0;
+                }
+                mControlState = CONTROL_NORMAL;
+                break;
+        }
     }
 }
