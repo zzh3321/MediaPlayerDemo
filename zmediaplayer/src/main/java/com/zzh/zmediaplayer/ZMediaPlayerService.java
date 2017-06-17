@@ -190,6 +190,7 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
 
     private MyBinder binder = new MyBinder();
 
+
     public class MyBinder extends Binder {
         public ZMediaPlayerService getService() {
             return ZMediaPlayerService.this;
@@ -200,7 +201,7 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
     private MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mp) {
-
+            next();
         }
     };
 
@@ -241,6 +242,7 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
     private void initMediaPlayer() {
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
+            mediaPlayer.setLooping(true);
             mediaPlayer.setOnPreparedListener(mOnPreparedListener);
             mediaPlayer.setOnCompletionListener(mOnCompletionListener);
             mediaPlayer.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
@@ -249,8 +251,11 @@ public class ZMediaPlayerService extends Service implements ZMediaPlayerInterfac
 
 
     public void setController() {
-        ZMediaPlayerController mController = ZMediaPlayerController.instance(this);
         mController.setMediaPlayerInterface(this);
+    }
+
+    public void setLooping(boolean looping){
+        mediaPlayer.setLooping(looping);
     }
 
 

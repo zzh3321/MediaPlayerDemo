@@ -30,9 +30,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ZMediaPlayer mediaPlayer = (ZMediaPlayer) findViewById(R.id.mediaplayer);
-
         Collections.addAll(listUrl, urls);
-
         mediaPlayer.setUp(listUrl);
     }
 }

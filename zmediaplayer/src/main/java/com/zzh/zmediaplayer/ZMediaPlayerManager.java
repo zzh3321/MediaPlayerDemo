@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.widget.Toast;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -30,6 +29,10 @@ public class ZMediaPlayerManager {
         bindMusicService();
     }
 
+    public static void unBind(){
+        mApplicationContext.unbindService(serviceConnection);
+    }
+
     /**
      * 绑定service
      */
@@ -45,7 +48,6 @@ public class ZMediaPlayerManager {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             try {
-                Toast.makeText(mApplicationContext, "bind success", Toast.LENGTH_SHORT).show();
                 mediaPlayerService = ((ZMediaPlayerService.MyBinder) (service)).getService();
             } catch (Exception e) {
                 e.printStackTrace();

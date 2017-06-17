@@ -1,6 +1,10 @@
 package com.zzh.zmediaplayer;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
@@ -35,6 +39,8 @@ public class ZMediaPlayerController implements View.OnClickListener, SeekBar.OnS
 
     private boolean startSeekbarTrackingTouch = true;
 
+    private boolean noWifiPlay = false;//是否在不是wifi环境下播放
+
     private static ZMediaPlayerInterface mPlayerInterface;
     private SimpleDateFormat time = new SimpleDateFormat("mm:ss");
     private static final String TAG = "ZMediaPlayerController";
@@ -66,6 +72,44 @@ public class ZMediaPlayerController implements View.OnClickListener, SeekBar.OnS
 
     @Override
     public void onClick(View v) {
+        if (noWifiPlay){
+            startPlay(v);
+        }else {
+            checkNetworkEnvironment(mContext, v);
+        }
+    }
+
+    private void checkNetworkEnvironment(Context mContext, final View v) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
+        if (activeNetInfo != null && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+
+        }else {
+            if (noWifiPlay){
+                return;
+            }
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setMessage("当前非wifi网络,继续播放将会消耗流量");
+            builder.setTitle("提示");
+            builder.setPositiveButton("继续播放", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    noWifiPlay = true;
+                    startPlay(v);
+                    dialog.dismiss();
+                }
+            });
+            builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.create().show();
+        }
+    }
+
+    private void startPlay(View v) {
         if (v == playBegin) {//开始播放或者暂停
             if (mPlayerInterface.isPlaying() || mPlayerInterface.isPreparing()) {
                 mPlayerInterface.pause();
@@ -166,7 +210,7 @@ public class ZMediaPlayerController implements View.OnClickListener, SeekBar.OnS
         int duration = mPlayerInterface.getDuration();
         int bufferPercentage = mPlayerInterface.getBufferPercentage();
         seekBar.setMax(duration);
-        if (!startSeekbarTrackingTouch){
+        if (!startSeekbarTrackingTouch) {
             seekBar.setProgress(position);
         }
         seekBar.setSecondaryProgress(duration * bufferPercentage / 100);
@@ -176,5 +220,9 @@ public class ZMediaPlayerController implements View.OnClickListener, SeekBar.OnS
 
     public void setMediaPlayerInterface(ZMediaPlayerInterface zMediaPlayerInterface) {
         mPlayerInterface = zMediaPlayerInterface;
+    }
+
+    public void setContext(Context context) {
+        mContext = context;
     }
 }

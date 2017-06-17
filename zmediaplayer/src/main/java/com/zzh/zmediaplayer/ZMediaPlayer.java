@@ -17,6 +17,7 @@ import java.util.List;
  */
 
 public class ZMediaPlayer extends FrameLayout {
+    private static final String TAG = "ZMediaPlayer";
     private Context context;
 
     private ZMediaPlayerController playerController;
@@ -33,8 +34,9 @@ public class ZMediaPlayer extends FrameLayout {
 
     public ZMediaPlayer(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        this.context = context;
+        this.context =  context;
         playerController = ZMediaPlayerController.instance(context);
+        playerController.setContext(context);
         mediaPlayerService = ZMediaPlayerManager.getMediaPlayerService();
         init();
     }
@@ -51,6 +53,9 @@ public class ZMediaPlayer extends FrameLayout {
         return R.layout.item_player;
     }
 
+    public void setLooping(boolean looping){
+        mediaPlayerService.setLooping(looping);
+    }
 
     public void setUp(String url) {
         mediaPlayerService.setUp(url);
