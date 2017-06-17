@@ -2,7 +2,9 @@
 
 一个简单的音频播放器demo
 
-This is a simple MediaPlayer Demo
+This is a simple MediaPlayer Demo\
+
+* `注意 : 项目中添加了一个MediaPlayerService , 使用的时候建议增加一个SplashActivity延迟2秒进入主页面 , 让服务进行初始化 , 否则会导致bindservice还没有获取到service对象导致项目空指针`
 
 ## Usage:
 
